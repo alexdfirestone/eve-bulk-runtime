@@ -1,5 +1,5 @@
 import { eveChannel } from "eve/channels/eve";
-import { localDev, placeholderAuth, vercelOidc } from "eve/channels/auth";
+import { localDev, none, placeholderAuth, vercelOidc } from "eve/channels/auth";
 
 export default eveChannel({
   auth: [
@@ -11,5 +11,7 @@ export default eveChannel({
     // Replace it with your app's auth provider, like Auth.js or Clerk,
     // or use none() for a public demo.
     placeholderAuth(),
+    // Demo-only: allows the local dashboard to call the agent without auth.
+    none(),
   ],
 });

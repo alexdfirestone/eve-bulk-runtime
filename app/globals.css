@@ -1,0 +1,16 @@
+* { box-sizing: border-box; }
+body { margin: 0; background: #f5f6f8; color: #15171a; font-family: Arial, sans-serif; }
+main { max-width: 1180px; margin: 0 auto; padding: 40px 24px; }
+h1 { margin: 0 0 8px; font-size: 30px; }
+p { color: #68707a; }
+.toolbar { display: flex; gap: 12px; margin: 28px 0; }
+.control { display: flex; flex-direction: column; gap: 4px; color: #68707a; font-size: 12px; }
+.control input { width: 104px; color: #15171a; }
+button, input { border: 1px solid #d9dde3; border-radius: 8px; padding: 10px 12px; background: white; font: inherit; }
+button { cursor: pointer; background: #17191c; color: white; border-color: #17191c; }
+.run { background: white; border: 1px solid #e0e3e7; border-radius: 12px; padding: 18px; margin-top: 16px; }
+.run-head { display: flex; justify-content: space-between; gap: 16px; align-items: center; }
+.stats { display: flex; gap: 18px; font-size: 14px; margin: 14px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { text-align: left; padding: 10px 8px; border-top: 1px solid #eceef1; }
+.pill { border-radius: 999px; padding: 4px 8px; background: #edf0f3; font-size: 12px; }

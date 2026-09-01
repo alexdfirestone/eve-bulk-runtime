@@ -3,8 +3,10 @@ node_modules
 .eve
 .vercel
 .next
+.data
 .output
 .nitro
 dist
 .DS_Store
 *.tsbuildinfo
+/.swc
