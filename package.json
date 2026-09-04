@@ -8,17 +8,21 @@
   },
   "scripts": {
     "build": "next build",
+    "db:migrate": "node scripts/migrate.mjs",
     "deploy": "eve deploy",
     "dev": "next dev",
-    "dev:all": "node scripts/dev-all.mjs",
+    "dev:all": "next dev",
     "eve:dev": "eve dev",
     "eval": "eve eval",
     "start": "next start",
     "typecheck": "tsc"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
     "@vercel/connect": "1.0.0",
+    "@vercel/oidc": "3.8.5",
     "ai": "^7.0.58",
+    "dotenv": "^17.4.2",
     "eve": "^0.47.3",
     "next": "^16.3.3",
     "react": "^19.2.8",

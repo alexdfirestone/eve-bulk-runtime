@@ -1,17 +1,11 @@
 import { eveChannel } from "eve/channels/eve";
-import { localDev, none, placeholderAuth, vercelOidc } from "eve/channels/auth";
+import { localDev, vercelOidc } from "eve/channels/auth";
 
 export default eveChannel({
   auth: [
-    // Lets the eve TUI and your Vercel deployments reach the deployed agent.
+    // Authenticates calls from this Vercel project, including the bulk workflow.
     vercelOidc(),
-    // Open on localhost for `eve dev` and the REPL; ignored in production.
+    // Accepted only under `eve dev`/`vercel dev`; it cannot open production.
     localDev(),
-    // This placeholder will not allow browser requests in production.
-    // Replace it with your app's auth provider, like Auth.js or Clerk,
-    // or use none() for a public demo.
-    placeholderAuth(),
-    // Demo-only: allows the local dashboard to call the agent without auth.
-    none(),
   ],
 });
