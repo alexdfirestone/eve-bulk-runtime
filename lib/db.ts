@@ -309,12 +309,12 @@ export async function markRunFailed(id: string, error = "The run failed before i
     "run_items.fail_before_start",
     `WITH failed_run AS (
        UPDATE bulk_runs
-       SET status = 'failed', finished_at = $2, updated_at = $2
+       SET status = 'failed', finished_at = $2::timestamptz, updated_at = $2::timestamptz
        WHERE id = $1 AND status IN ('queued', 'running')
        RETURNING id
      )
      UPDATE run_items
-     SET status = 'failed', error = $3, error_code = 'RUN_FAILED', finished_at = $2, updated_at = $2
+     SET status = 'failed', error = $3, error_code = 'RUN_FAILED', finished_at = $2::timestamptz, updated_at = $2::timestamptz
      WHERE run_id IN (SELECT id FROM failed_run) AND status IN ('queued', 'running')`,
     [id, now, error],
   );
@@ -432,7 +432,7 @@ export async function markItemCompleted(runId: string, itemKey: string, result: 
     "run_item.mark_completed",
     `UPDATE run_items
      SET status = 'completed', result_json = $1::jsonb, error = NULL, error_code = NULL,
-         finished_at = $2, updated_at = $2
+         finished_at = $2::timestamptz, updated_at = $2::timestamptz
      WHERE run_id = $3 AND item_key = $4 AND status = 'running'
        AND EXISTS (
          SELECT 1 FROM bulk_runs AS r
@@ -466,13 +466,13 @@ export async function markBatchFailed(batchId: string, error: string) {
     "run_batch.mark_failed",
     `WITH failed_batch AS (
        UPDATE run_batches
-       SET status = 'failed', finished_at = $2, updated_at = $2
+       SET status = 'failed', finished_at = $2::timestamptz, updated_at = $2::timestamptz
        WHERE id = $1 AND status IN ('queued', 'running')
        RETURNING id
      )
      UPDATE run_items
      SET status = 'failed', error = $3, error_code = 'BATCH_FAILED',
-         finished_at = $2, updated_at = $2
+         finished_at = $2::timestamptz, updated_at = $2::timestamptz
      WHERE batch_id IN (SELECT id FROM failed_batch) AND status IN ('queued', 'running')`,
     [batchId, now, error.slice(0, 4000)],
   );
@@ -498,9 +498,9 @@ export async function finalizeBatch(batchId: string) {
          WHEN EXISTS (
            SELECT 1 FROM run_items WHERE batch_id = b.id AND status IN ('queued', 'running')
          ) THEN NULL
-         ELSE $2
+         ELSE $2::timestamptz
        END,
-       updated_at = $2
+       updated_at = $2::timestamptz
      WHERE b.id = $1
      RETURNING succeeded, failed, status`,
     [batchId, now],
@@ -528,9 +528,9 @@ export async function finalizeRun(runId: string) {
            WHEN EXISTS (
              SELECT 1 FROM run_items WHERE run_id = r.id AND status IN ('queued', 'running')
            ) THEN NULL
-           ELSE $2
+           ELSE $2::timestamptz
          END,
-         updated_at = $2
+         updated_at = $2::timestamptz
        WHERE r.id = $1 AND r.status = 'running'
        RETURNING id
      )
