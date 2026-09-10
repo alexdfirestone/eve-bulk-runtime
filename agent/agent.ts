@@ -1,5 +1,5 @@
 import { defineAgent } from "eve";
 
 export default defineAgent({
-  model: "minimax/minimax-m2.7-free",
+  model: "inclusionai/ling-3.0-flash-sante-free",
 });

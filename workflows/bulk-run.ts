@@ -26,26 +26,6 @@ import {
 } from "../lib/db";
 import { logger } from "../lib/logger";
 
-const outputSchema = {
-  type: "object",
-  properties: {
-    answer: { type: "string" },
-    value: { anyOf: [{ type: "number" }, { type: "null" }] },
-    assumptions: { type: "array", items: { type: "string" } },
-    evidence: { type: "array", items: { type: "string" } },
-  },
-  required: ["answer", "value", "assumptions", "evidence"],
-  additionalProperties: false,
-} as const;
-
-const structuredOutputSchema = z.object({
-  answer: z.string(),
-  value: z.number().nullable(),
-  assumptions: z.array(z.string()),
-  evidence: z.array(z.string()),
-});
-
-type EveOutput = z.infer<typeof structuredOutputSchema>;
 type EveEvent = {
   type: string;
   data?: Record<string, unknown>;
@@ -186,7 +166,7 @@ async function readEveResult(
   signal: AbortSignal,
 ) {
   let startIndex = 0;
-  let structuredResult: EveOutput | undefined;
+  let textResult: string | undefined;
   let lastFailure: string | undefined;
   const eventIds = new Set<string>();
 
@@ -208,8 +188,12 @@ async function readEveResult(
         if (event.meta?.id) eventIds.add(event.meta.id);
         startIndex += 1;
 
-        if (event.type === "result.completed") {
-          structuredResult = structuredOutputSchema.parse(event.data?.result);
+        if (event.type === "message.completed") {
+          const message = event.data?.message;
+          const finishReason = event.data?.finishReason;
+          if (typeof message === "string" && message.trim() && finishReason !== "tool-calls") {
+            textResult = message;
+          }
         }
         if ((event.type === "step.failed" || event.type === "turn.failed") && typeof event.data?.message === "string") {
           lastFailure = event.data.message;
@@ -232,10 +216,10 @@ async function readEveResult(
         buffer = lines.pop() ?? "";
 
         for (const line of lines) {
-          if (processLine(line)) return { data: structuredResult, lastFailure };
+          if (processLine(line)) return { data: textResult, lastFailure };
         }
         if (done) {
-          if (processLine(buffer)) return { data: structuredResult, lastFailure };
+          if (processLine(buffer)) return { data: textResult, lastFailure };
           break;
         }
       }
@@ -294,10 +278,9 @@ async function runItem(runId: string, batchId: string, itemKey: string) {
         redirect: "error",
         signal,
         body: JSON.stringify({
-          message: `Question: ${execution.question}\nAnalyze item ${itemKey}. Return only the requested structured result.`,
+          message: `Question: ${execution.question}\nAnalyze item ${itemKey}. Return only a concise plain-text answer.`,
           clientContext: { itemKey, context: execution.context },
           operationId: `${runId}:${itemKey}:${running.attempts}`,
-          outputSchema,
         }),
       });
       await requireOk(createResponse, "eve session create");
@@ -312,7 +295,7 @@ async function runItem(runId: string, batchId: string, itemKey: string) {
     const result = await readEveResult(host, sessionId, headers, signal);
     if (!result.data) {
       const detail = result.lastFailure ? ` (${result.lastFailure})` : "";
-      throw new Error(`eve session returned no structured result${detail}`);
+      throw new Error(`eve session returned no text response${detail}`);
     }
     const completed = await markItemCompleted(runId, itemKey, result.data);
     if (!completed) return { itemKey, status: "cancelled" as const };

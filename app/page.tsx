@@ -330,9 +330,11 @@ export default function Home() {
               <td>{item.itemKey}</td>
               <td><span className={`pill ${item.status}`}>{item.status}</span></td>
               <td className="result">
-                {item.result && typeof item.result === "object" && "answer" in item.result
-                  ? String((item.result as { answer: unknown }).answer)
-                  : "—"}
+                {typeof item.result === "string"
+                  ? item.result
+                  : item.result && typeof item.result === "object" && "answer" in item.result
+                    ? String((item.result as { answer: unknown }).answer)
+                    : "—"}
               </td>
               <td className="error-cell">{item.error ?? "—"}</td>
               <td>{item.attempts}</td>

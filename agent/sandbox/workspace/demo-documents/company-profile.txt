@@ -1,0 +1,3 @@
+DEMO DOCUMENT — Company Profile
+Example Manufacturing Co. is synthetic test data for bulk-runtime scale tests.
+Keywords: revenue, valuation, estimate, evidence.
